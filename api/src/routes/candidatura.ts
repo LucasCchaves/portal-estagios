@@ -28,9 +28,13 @@ const statusSchema = z.object({
 
 router.get("/", async (req, res, next) => {
   try {
+    const vagaId = req.query.vagaId ? Number(req.query.vagaId) : undefined
+
     const candidaturas = await candidaturaRepository.find({
+      where: vagaId ? { vaga: { id: vagaId } } : {},
       relations: { aluno: true, vaga: true }
     })
+
     res.json(candidaturas)
   } catch (error) {
     next(error)
