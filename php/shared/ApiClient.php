@@ -2,7 +2,7 @@
 
 class ApiClient{
 
-    private string $baseUrl = 'http://localhost:8080';  
+    private string $baseUrl = 'http://localhost:3000';  
 
     public function get(string $endpoint): array{
         $json = file_get_contents($this->baseUrl . $endpoint);
@@ -30,7 +30,7 @@ class ApiClient{
         $options = [
             'http' => [
                 'method' => 'PATCH',
-                'header' => 'Content-Type: aplication/json',
+                'header' => 'Content-Type: application/json',
                 'content' => json_encode($dados)
             ]
         ];
@@ -40,7 +40,21 @@ class ApiClient{
         return json_decode($json, true);
     }
 
-    public function delete(string $endpoint, array $dados): bool{
+    public function put(string $endpoint, array $dados): array{
+        $options = [
+            'http' => [
+                'method' => 'PUT',
+                'header' => 'Content-Type: application/json',
+                'content' => json_encode($dados)
+            ]
+        ];
+        $context = stream_context_create($options);
+        $json = file_get_contents($this->baseUrl . $endpoint, false, $context);
+        if ($json === false) return[]; 
+        return json_decode($json, true);
+    }
+
+    public function delete(string $endpoint): bool{
         $options = [
             'http' => [
                 'method' => 'DELETE',
