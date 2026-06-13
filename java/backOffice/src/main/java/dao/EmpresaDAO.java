@@ -102,8 +102,6 @@ public class EmpresaDAO implements IGenericDAO<Empresa> {
         }
     }
 
-    // — helpers —
-
     private void preencherStatement(PreparedStatement ps, Empresa e) throws SQLException {
         ps.setString(1, e.getNome());
         ps.setString(2, e.getCnpj());

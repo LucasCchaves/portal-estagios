@@ -16,6 +16,7 @@ public class TelaEmpresa extends TelaBase implements PainelDefault{
     public TelaEmpresa(IEmpresaService service) {
         super("Gestão de Empresas - UniALFA", 850, 500);
         this.service = service;
+        carregarDados();
     }
 
     @Override

@@ -1,6 +1,8 @@
 package gui;
 
+import model.Empresa;
 import model.Vaga;
+import services.IEmpresaService;
 import services.IVagaService;
 import errorHandler.GerenciadorExcecoes;
 
@@ -10,12 +12,15 @@ import javax.swing.*;
 
 public class TelaVagas extends TelaBase implements PainelDefault {
 
-    private final IVagaService service;
+    private final IVagaService    service;
+    private final IEmpresaService empresaService;
     private List<Vaga> vagas;
 
-    public TelaVagas(IVagaService service) {
+    public TelaVagas(IVagaService service, IEmpresaService empresaService) {
         super("Gestão de Vagas - UniALFA", 950, 500);
-        this.service = service;
+        this.service        = service;
+        this.empresaService = empresaService;
+        carregarDados();
     }
 
     @Override
@@ -96,7 +101,23 @@ public class TelaVagas extends TelaBase implements PainelDefault {
     private void abrirFormulario(Vaga vaga) {
         boolean editando = vaga != null;
 
-        JTextField txtEmpresaId  = new JTextField(editando ? String.valueOf(vaga.getEmpresaId())    : "", 20);
+        List<Empresa> listaEmpresas = empresaService.listar();
+        JComboBox<Empresa> cmbEmpresa = new JComboBox<>(listaEmpresas.toArray(new Empresa[0]));
+        cmbEmpresa.setRenderer(new DefaultListCellRenderer() {
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                                                          int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Empresa) setText(((Empresa) value).getNome());
+                return this;
+            }
+        });
+        if (editando) {
+            listaEmpresas.stream()
+                    .filter(e -> e.getId() == vaga.getEmpresaId())
+                    .findFirst()
+                    .ifPresent(cmbEmpresa::setSelectedItem);
+        }
+
         JTextField txtTitulo     = new JTextField(editando ? vaga.getTitulo()                       : "", 20);
         JTextField txtArea       = new JTextField(editando ? vaga.getArea()                         : "", 20);
         JTextField txtRequisitos = new JTextField(editando ? vaga.getRequisitos()                   : "", 20);
@@ -110,13 +131,13 @@ public class TelaVagas extends TelaBase implements PainelDefault {
         if (editando) cmbModalidade.setSelectedItem(vaga.getModalidade());
 
         JPanel form = new JPanel(new GridBagLayout());
-        painelAdd(form, new JLabel("ID da Empresa *:"), 0, 0); painelAdd(form, txtEmpresaId,              1, 0);
-        painelAdd(form, new JLabel("Título *:"),        0, 1); painelAdd(form, txtTitulo,                 1, 1);
-        painelAdd(form, new JLabel("Área *:"),          0, 2); painelAdd(form, txtArea,                   1, 2);
-        painelAdd(form, new JLabel("Requisitos:"),      0, 3); painelAdd(form, txtRequisitos,             1, 3);
-        painelAdd(form, new JLabel("Carga Horária:"),   0, 4); painelAdd(form, txtCargaH,                 1, 4);
-        painelAdd(form, new JLabel("Modalidade:"),      0, 5); painelAdd(form, cmbModalidade,             1, 5);
-        painelAdd(form, new JLabel("Descrição:"),       0, 6); painelAdd(form, new JScrollPane(txtDescricao), 1, 6);
+        painelAdd(form, new JLabel("Empresa *:"),     0, 0); painelAdd(form, cmbEmpresa,                    1, 0);
+        painelAdd(form, new JLabel("Título *:"),      0, 1); painelAdd(form, txtTitulo,                     1, 1);
+        painelAdd(form, new JLabel("Área *:"),        0, 2); painelAdd(form, txtArea,                       1, 2);
+        painelAdd(form, new JLabel("Requisitos:"),    0, 3); painelAdd(form, txtRequisitos,                 1, 3);
+        painelAdd(form, new JLabel("Carga Horária:"), 0, 4); painelAdd(form, txtCargaH,                     1, 4);
+        painelAdd(form, new JLabel("Modalidade:"),    0, 5); painelAdd(form, cmbModalidade,                 1, 5);
+        painelAdd(form, new JLabel("Descrição:"),     0, 6); painelAdd(form, new JScrollPane(txtDescricao), 1, 6);
 
         int res = JOptionPane.showConfirmDialog(this, form,
                 editando ? "Editar Vaga" : "Nova Vaga",
@@ -126,7 +147,9 @@ public class TelaVagas extends TelaBase implements PainelDefault {
 
         try {
             Vaga v = editando ? vaga : new Vaga();
-            v.setEmpresaId(Integer.parseInt(txtEmpresaId.getText().trim()));
+            Empresa empSelecionada = (Empresa) cmbEmpresa.getSelectedItem();
+            v.setEmpresaId(empSelecionada.getId());
+            v.setEmpresaNome(empSelecionada.getNome());
             v.setTitulo(txtTitulo.getText().trim());
             v.setArea(txtArea.getText().trim());
             v.setRequisitos(txtRequisitos.getText().trim());

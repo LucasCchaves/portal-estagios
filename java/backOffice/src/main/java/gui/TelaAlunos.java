@@ -25,13 +25,13 @@ public class TelaAlunos extends TelaBase implements PainelDefault {
 
     @Override
     protected String[] colunas() {
-        return new String[]{"ID", "Nome", "RA", "Email", "Curso", "Apto"};
+        return new String[]{"ID", "Nome", "RA", "CPF","Email", "Curso", "Apto"};
     }
 
     @Override
     protected void configurarColunas() {
         tabela.getColumnModel().getColumn(0).setPreferredWidth(40);
-        tabela.getColumnModel().getColumn(5).setPreferredWidth(50);
+        tabela.getColumnModel().getColumn(6).setPreferredWidth(50);
     }
 
     @Override
@@ -102,6 +102,7 @@ public class TelaAlunos extends TelaBase implements PainelDefault {
                     a.getId(),
                     a.getNome(),
                     a.getMatricula(),
+                    a.getCpf(),
                     a.getEmail(),
                     a.getCurso(),
                     a.isApto() ? "✔ Sim" : "✘ Não"
@@ -122,6 +123,7 @@ public class TelaAlunos extends TelaBase implements PainelDefault {
         boolean editando = aluno != null;
 
         JTextField txtNome      = new JTextField(editando ? aluno.getNome()                    : "", 20);
+        JTextField txtCpf       = new JTextField(editando ? aluno.getCpf()                      : "",20);
         JTextField txtMatricula = new JTextField(editando ? aluno.getMatricula()               : "", 20);
         JTextField txtEmail     = new JTextField(editando ? aluno.getEmail()                   : "", 20);
         JTextField txtCurso     = new JTextField(editando ? aluno.getCurso()                   : "", 20);
@@ -129,10 +131,11 @@ public class TelaAlunos extends TelaBase implements PainelDefault {
 
         JPanel form = new JPanel(new GridBagLayout());
         painelAdd(form, new JLabel("Nome *:"),         0, 0); painelAdd(form, txtNome,      1, 0);
-        painelAdd(form, new JLabel("Matrícula *:"),    0, 1); painelAdd(form, txtMatricula, 1, 1);
-        painelAdd(form, new JLabel("Email:"),          0, 2); painelAdd(form, txtEmail,     1, 2);
-        painelAdd(form, new JLabel("Curso:"),          0, 3); painelAdd(form, txtCurso,     1, 3);
-        painelAdd(form, new JLabel("Período (1-12):"), 0, 4); painelAdd(form, txtPeriodo,   1, 4);
+        painelAdd(form, new JLabel("CPF:"),            0, 1); painelAdd(form, txtCpf,       1, 1);
+        painelAdd(form, new JLabel("Matrícula *:"),    0, 2); painelAdd(form, txtMatricula, 1, 2);
+        painelAdd(form, new JLabel("Email:"),          0, 3); painelAdd(form, txtEmail,     1, 3);
+        painelAdd(form, new JLabel("Curso:"),          0, 4); painelAdd(form, txtCurso,     1, 4);
+        painelAdd(form, new JLabel("Período (1-12):"), 0, 5); painelAdd(form, txtPeriodo,   1, 5);
 
         int res = JOptionPane.showConfirmDialog(
                 this, form,
@@ -144,6 +147,7 @@ public class TelaAlunos extends TelaBase implements PainelDefault {
         try {
             Aluno a = editando ? aluno : new Aluno();
             a.setNome(txtNome.getText().trim());
+            a.setCpf(txtCpf.getText().trim());
             a.setMatricula(txtMatricula.getText().trim());
             a.setEmail(txtEmail.getText().trim());
             a.setCurso(txtCurso.getText().trim());
