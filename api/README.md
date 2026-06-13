@@ -1,4 +1,3 @@
-
 # Portal de Estágios — API Node.js
 
 API RESTful desenvolvida em Node.js com TypeScript, responsável por centralizar a lógica de negócio do Portal de Estágios UniALFA.
@@ -28,11 +27,12 @@ DB_NAME=db_estagio
 PORT=3000
 ```
 
-Crie o banco de dados `db_estagio` no MySQL, depois rode as migrations:
+Crie o banco de dados `banco_estagio` no MySQL, depois rode as migrations:
 
 ```bash
 npx typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts
 ```
+
 Popule o banco com dados iniciais:
 
 ```bash
@@ -78,6 +78,7 @@ npm run dev
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | /api/candidaturas | Lista todas as candidaturas |
+| GET | /api/candidaturas?vagaId=1 | Filtra candidaturas por vaga |
 | GET | /api/candidaturas/:id | Busca candidatura por id |
 | POST | /api/candidaturas | Cria candidatura |
 | PUT | /api/candidaturas/:id/status | Atualiza status da candidatura |
@@ -102,6 +103,9 @@ src/
 │   ├── migrations/
 │   └── seeds/
 ├── models/
+├── repositories/
+├── services/
+├── controllers/
 ├── routes/
 └── utils/
 ```

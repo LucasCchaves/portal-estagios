@@ -14,13 +14,13 @@ async function rodarSeed() {
   const vagaRepo = AppDataSource.getRepository(Vaga)
   const candidaturaRepo = AppDataSource.getRepository(Candidatura)
 
-  // Empresas
   const jaTemEmpresa = await empresaRepo.exists({ where: { cnpj: "12345678000190" } })
   if (!jaTemEmpresa) {
     const empresa1 = await empresaRepo.save(empresaRepo.create({
       nome: "Tech Solutions",
       cnpj: "12345678000190",
       email: "contato@techsolutions.com",
+      senha: "123456",
       telefone: "44999999999",
       area_atuacao: "Tecnologia",
       status: "aprovada",
@@ -30,12 +30,12 @@ async function rodarSeed() {
       nome: "Marketing Pro",
       cnpj: "98765432000111",
       email: "contato@marketingpro.com",
+      senha: "123456",
       telefone: "44988887777",
       area_atuacao: "Marketing",
       status: "aprovada",
     }))
 
-    // Vagas
     const vaga1 = await vagaRepo.save(vagaRepo.create({
       titulo: "Desenvolvedor Frontend",
       descricao: "Vaga para desenvolvedor frontend",
@@ -58,12 +58,12 @@ async function rodarSeed() {
       empresa: empresa2,
     }))
 
-    // Alunos
     const jaTemAluno = await alunoRepo.exists({ where: { cpf: "12345678901" } })
     if (!jaTemAluno) {
       const aluno1 = await alunoRepo.save(alunoRepo.create({
         nome: "Lucas Silva",
         email: "lucas@email.com",
+        senha: "123456",
         cpf: "12345678901",
         matricula: "2024001",
         curso: "Sistemas para Internet",
@@ -75,6 +75,7 @@ async function rodarSeed() {
       const aluno2 = await alunoRepo.save(alunoRepo.create({
         nome: "Ana Souza",
         email: "ana@email.com",
+        senha: "123456",
         cpf: "98765432100",
         matricula: "2024002",
         curso: "Sistemas para Internet",
@@ -83,7 +84,6 @@ async function rodarSeed() {
         status: "ativo",
       }))
 
-      // Candidaturas
       await candidaturaRepo.save(candidaturaRepo.create({
         aluno: aluno1,
         vaga: vaga1,

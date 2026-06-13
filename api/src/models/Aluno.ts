@@ -13,6 +13,9 @@ export class Aluno {
   @Column({ type: "varchar", length: 255 })
   email: string
 
+  @Column({ type: "varchar", length: 255, nullable: true })
+  senha: string
+
   @Column({ type: "varchar", length: 11 })
   cpf: string
 
