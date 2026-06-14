@@ -29,6 +29,7 @@ export class AlunoRepository {
         id: true,
         nome: true,
         email: true,
+        senha: true,
         cpf: true,
         matricula: true,
         curso: true,

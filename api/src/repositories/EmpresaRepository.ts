@@ -28,6 +28,7 @@ async buscarPorId(id: number): Promise<Empresa | undefined> {
       nome: true,
       cnpj: true,
       email: true,
+      senha: true, 
       telefone: true,
       area_atuacao: true,
       status: true,

@@ -8,8 +8,8 @@ class EmpresaService{
 
     private ApiClient $api;
 
-    public function __construct(){
-        $this->api = new ApiClient();
+    public function __construct(ApiClient $api){
+        $this->api = $api;
     }
 
     public function listarVagas(int $empresaId): array{
@@ -40,6 +40,18 @@ class EmpresaService{
         $dados = ['status' => $status];
         return $this->api->put('/api/candidaturas/' . $id . '/status', $dados);
     }
+
+    public function login(string $email, string $senha): ?array {
+    $resposta = $this->api->get('/api/empresas');
+    
+    foreach ($resposta['empresas'] as $empresa) {
+        if ($empresa['email'] === $email && $empresa['senha'] === $senha) {
+            return $empresa;
+        }
+    }
+    
+    return null;
+}
     
 }
 

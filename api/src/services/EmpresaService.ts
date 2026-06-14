@@ -1,6 +1,7 @@
 import type { EmpresaRepository } from "../repositories/EmpresaRepository"
 import type { Empresa } from "../models/Empresa"
 import AppError from "../utils/AppError"
+import bcrypt from 'bcrypt'
 
 export class EmpresaService {
   constructor(private readonly repository: EmpresaRepository) {}
@@ -18,6 +19,9 @@ export class EmpresaService {
   async criar(dados: Partial<Empresa>): Promise<Empresa> {
     const existente = await this.repository.buscarPorCnpj(dados.cnpj!)
     if (existente) throw new AppError("CNPJ já cadastrado", 409)
+
+    dados.senha = await bcrypt.hash(dados.senha!, 10);
+
     return this.repository.criar(dados)
   }
 
@@ -27,6 +31,7 @@ export class EmpresaService {
 
     if (dados.nome !== undefined) empresa.nome = dados.nome
     if (dados.email !== undefined) empresa.email = dados.email
+    if (dados.senha !== undefined) empresa.senha = dados.senha = await bcrypt.hash(dados.senha!, 10)
     if (dados.telefone !== undefined) empresa.telefone = dados.telefone
     if (dados.area_atuacao !== undefined) empresa.area_atuacao = dados.area_atuacao
     if (dados.status !== undefined) empresa.status = dados.status
@@ -38,4 +43,6 @@ export class EmpresaService {
     const ok = await this.repository.remover(id)
     if (!ok) throw new AppError("Empresa não encontrada", 404)
   }
+
+
 }

@@ -1,6 +1,8 @@
 import type { AlunoRepository } from "../repositories/AlunoRepository"
 import type { Aluno } from "../models/Aluno"
 import AppError from "../utils/AppError"
+import bcrypt from 'bcrypt'
+
 
 export class AlunoService {
   constructor(private readonly repository: AlunoRepository) {}
@@ -22,6 +24,8 @@ export class AlunoService {
     const matriculaExistente = await this.repository.buscarPorMatricula(dados.matricula!)
     if (matriculaExistente) throw new AppError("Matrícula já cadastrada", 409)
 
+    dados.senha = await bcrypt.hash(dados.senha!, 10);
+    
     return this.repository.criar(dados)
   }
 
@@ -31,6 +35,7 @@ export class AlunoService {
 
     if (dados.nome !== undefined) aluno.nome = dados.nome
     if (dados.email !== undefined) aluno.email = dados.email
+    if (dados.senha !== undefined) aluno.senha = dados.senha = await bcrypt.hash(dados.senha!, 10)
     if (dados.curso !== undefined) aluno.curso = dados.curso
     if (dados.periodo !== undefined) aluno.periodo = dados.periodo
     if (dados.apto !== undefined) aluno.apto = dados.apto
