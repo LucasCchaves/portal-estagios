@@ -16,6 +16,9 @@ export class Empresa {
   @Column({ type: "varchar", length: 255 })
   email: string
 
+  @Column({ type: "varchar", length: 255, nullable: true })
+  senha: string
+
   @Column({ type: "varchar", length: 20, nullable: true })
   telefone: string
 

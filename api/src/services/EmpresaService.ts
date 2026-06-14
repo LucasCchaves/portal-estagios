@@ -1,0 +1,41 @@
+import type { EmpresaRepository } from "../repositories/EmpresaRepository"
+import type { Empresa } from "../models/Empresa"
+import AppError from "../utils/AppError"
+
+export class EmpresaService {
+  constructor(private readonly repository: EmpresaRepository) {}
+
+  async listar(): Promise<Empresa[]> {
+    return this.repository.listarTodos()
+  }
+
+  async buscarPorId(id: number): Promise<Empresa> {
+    const empresa = await this.repository.buscarPorId(id)
+    if (!empresa) throw new AppError("Empresa não encontrada", 404)
+    return empresa
+  }
+
+  async criar(dados: Partial<Empresa>): Promise<Empresa> {
+    const existente = await this.repository.buscarPorCnpj(dados.cnpj!)
+    if (existente) throw new AppError("CNPJ já cadastrado", 409)
+    return this.repository.criar(dados)
+  }
+
+  async atualizar(id: number, dados: Partial<Empresa>): Promise<Empresa> {
+    const empresa = await this.repository.buscarPorId(id)
+    if (!empresa) throw new AppError("Empresa não encontrada", 404)
+
+    if (dados.nome !== undefined) empresa.nome = dados.nome
+    if (dados.email !== undefined) empresa.email = dados.email
+    if (dados.telefone !== undefined) empresa.telefone = dados.telefone
+    if (dados.area_atuacao !== undefined) empresa.area_atuacao = dados.area_atuacao
+    if (dados.status !== undefined) empresa.status = dados.status
+
+    return this.repository.salvar(empresa)
+  }
+
+  async remover(id: number): Promise<void> {
+    const ok = await this.repository.remover(id)
+    if (!ok) throw new AppError("Empresa não encontrada", 404)
+  }
+}

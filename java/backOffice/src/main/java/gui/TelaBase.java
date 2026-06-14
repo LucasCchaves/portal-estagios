@@ -1,4 +1,4 @@
-package backOffice.src.main.java.gui;
+package gui;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -18,8 +18,6 @@ public abstract class TelaBase extends JFrame implements PainelDefault {
         add(montarTopo(),   BorderLayout.NORTH);
         add(montarTabela(), BorderLayout.CENTER);
         add(montarRodape(), BorderLayout.SOUTH);
-
-        carregarDados();
     }
 
     protected abstract String labelBusca();

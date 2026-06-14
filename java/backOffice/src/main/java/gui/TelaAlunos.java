@@ -1,152 +1,178 @@
 package gui;
 
+import model.Aluno;
+import services.IAlunoService;
+import errorHandler.GerenciadorExcecoes;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 
-public class TelaAlunos extends JFrame {
+public class TelaAlunos extends TelaBase implements PainelDefault {
 
-    private final AlunoService service = new AlunoService();
-
-    private JTable tabela;
-    private DefaultTableModel modelo;
+    private final IAlunoService service;
     private List<Aluno> alunos;
-    private JTextField txtBusca;
 
-    public TelaAlunos() {
-        setTitle("Gestão de Alunos - UniALFA");
-        setSize(800, 500);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new BorderLayout(10, 10));
+    public TelaAlunos(IAlunoService service) {
+        super("Gestão de Alunos - UniALFA", 800, 500);
+        this.service = service;
+        carregarDados();
+    }
 
-        JPanel topo = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
-        topo.add(new JLabel("Buscar por nome:"));
-        txtBusca = new JTextField(20);
-        JButton btnBuscar = new JButton("Buscar");
-        JButton btnLimpar = new JButton("Limpar");
-        topo.add(txtBusca);
-        topo.add(btnBuscar);
-        topo.add(btnLimpar);
-        add(topo, BorderLayout.NORTH);
+    @Override
+    protected String labelBusca() {
+        return "Buscar por nome:";
+    }
 
-        String[] colunas = {"ID", "Nome", "RA", "Email", "Curso", "Apto"};
-        modelo = new DefaultTableModel(colunas, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
-        };
-        tabela = new JTable(modelo);
-        tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    @Override
+    protected String[] colunas() {
+        return new String[]{"ID", "Nome", "RA", "CPF","Email", "Curso", "Apto"};
+    }
+
+    @Override
+    protected void configurarColunas() {
         tabela.getColumnModel().getColumn(0).setPreferredWidth(40);
-        tabela.getColumnModel().getColumn(5).setPreferredWidth(50);
-        add(new JScrollPane(tabela), BorderLayout.CENTER);
+        tabela.getColumnModel().getColumn(6).setPreferredWidth(50);
+    }
 
-        JPanel rodape = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 8));
+    @Override
+    protected void carregarDados() {
+        alunos = service.listar();
+        preencherTabela(alunos);
+    }
+
+    @Override
+    protected void buscar(String termo) {
+        if (termo.isBlank()) {
+            carregarDados();
+            return;
+        }
+        List<Aluno> filtrados = alunos.stream()
+                .filter(a -> a.getNome().toLowerCase().contains(termo.toLowerCase()))
+                .toList();
+        preencherTabela(filtrados);
+    }
+
+    @Override
+    protected JPanel montarRodape() {
         JButton btnNovo     = new JButton("Novo Aluno");
         JButton btnEditar   = new JButton("Editar");
         JButton btnExcluir  = new JButton("Excluir");
         JButton btnApto     = new JButton("Alternar Aptidão");
+        JButton btnBloquear = new JButton("Bloquear");
+        JButton btnAtivar   = new JButton("Ativar");
         JButton btnImportar = new JButton("Importar .txt");
+
+        btnNovo    .addActionListener(e -> abrirFormulario(null));
+        btnEditar  .addActionListener(e -> { Aluno s = getAlunoSelecionado(); if (s != null) abrirFormulario(s); });
+        btnExcluir .addActionListener(e -> excluir());
+        btnApto    .addActionListener(e -> alternarAptidao());
+        btnImportar.addActionListener(e -> importarTxt());
+
+        btnBloquear.addActionListener(e -> {
+            Aluno a = getAlunoSelecionado();
+            if (a == null) return;
+            service.bloquear(a);
+            carregarDados();
+            JOptionPane.showMessageDialog(this, "Aluno bloqueado.");
+        });
+
+        btnAtivar.addActionListener(e -> {
+            Aluno a = getAlunoSelecionado();
+            if (a == null) return;
+            service.ativar(a);
+            carregarDados();
+            JOptionPane.showMessageDialog(this, "Aluno ativado.");
+        });
+
+        JPanel rodape = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 8));
         rodape.add(btnNovo);
         rodape.add(btnEditar);
         rodape.add(btnExcluir);
         rodape.add(btnApto);
+        rodape.add(btnBloquear);
+        rodape.add(btnAtivar);
         rodape.add(btnImportar);
-        add(rodape, BorderLayout.SOUTH);
-
-        btnNovo.addActionListener(e -> abrirFormulario(null));
-        btnEditar.addActionListener(e -> {
-            Aluno selecionado = getAlunoSelecionado();
-            if (selecionado != null) abrirFormulario(selecionado);
-        });
-        btnExcluir.addActionListener(e -> excluir());
-        btnApto.addActionListener(e -> alternarAptidao());
-        btnImportar.addActionListener(e -> importarTxt());
-        btnBuscar.addActionListener(e -> buscar());
-        txtBusca.addActionListener(e -> buscar());
-        btnLimpar.addActionListener(e -> { txtBusca.setText(""); carregarDados(); });
-
-        carregarDados();
-    }
-
-    private void carregarDados() {
-        alunos = service.listar();
-        preencherTabela(alunos);
+        return rodape;
     }
 
     private void preencherTabela(List<Aluno> lista) {
         modelo.setRowCount(0);
         for (Aluno a : lista) {
             modelo.addRow(new Object[]{
-                    a.getId(), a.getNome(), a.getRa(),
-                    a.getEmail(), a.getCurso(),
+                    a.getId(),
+                    a.getNome(),
+                    a.getMatricula(),
+                    a.getCpf(),
+                    a.getEmail(),
+                    a.getCurso(),
                     a.isApto() ? "✔ Sim" : "✘ Não"
             });
         }
     }
 
-    private void buscar() {
-        String termo = txtBusca.getText().trim().toLowerCase();
-        if (termo.isBlank()) { carregarDados(); return; }
-        List<Aluno> filtrados = alunos.stream()
-                .filter(a -> a.getNome().toLowerCase().contains(termo))
-                .toList();
-        preencherTabela(filtrados);
-    }
-
     private Aluno getAlunoSelecionado() {
-        int linha = tabela.getSelectedRow();
-        if (linha < 0) {
-            JOptionPane.showMessageDialog(this, "Selecione um aluno na tabela.");
-            return null;
-        }
-        int id = (int) modelo.getValueAt(linha, 0);
-        return alunos.stream().filter(a -> a.getId() == id).findFirst().orElse(null);
+        int id = getIdSelecionado("um aluno");
+        if (id == -1) return null;
+        return alunos.stream()
+                .filter(a -> a.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
 
     private void abrirFormulario(Aluno aluno) {
         boolean editando = aluno != null;
-        JTextField txtNome  = new JTextField(editando ? aluno.getNome()  : "", 20);
-        JTextField txtRa    = new JTextField(editando ? aluno.getRa()    : "", 20);
-        JTextField txtEmail = new JTextField(editando ? aluno.getEmail() : "", 20);
-        JTextField txtCurso = new JTextField(editando ? aluno.getCurso() : "", 20);
 
-        JPanel form = new JPanel(new GridLayout(4, 2, 6, 6));
-        form.add(new JLabel("Nome *:")); form.add(txtNome);
-        form.add(new JLabel("RA *:"));  form.add(txtRa);
-        form.add(new JLabel("Email:")); form.add(txtEmail);
-        form.add(new JLabel("Curso:")); form.add(txtCurso);
+        JTextField txtNome      = new JTextField(editando ? aluno.getNome()                    : "", 20);
+        JTextField txtCpf       = new JTextField(editando ? aluno.getCpf()                      : "",20);
+        JTextField txtMatricula = new JTextField(editando ? aluno.getMatricula()               : "", 20);
+        JTextField txtEmail     = new JTextField(editando ? aluno.getEmail()                   : "", 20);
+        JTextField txtCurso     = new JTextField(editando ? aluno.getCurso()                   : "", 20);
+        JTextField txtPeriodo   = new JTextField(editando ? String.valueOf(aluno.getPeriodo()) : "1", 5);
 
-        int res = JOptionPane.showConfirmDialog(this, form,
-                editando ? "Editar Aluno" : "Novo Aluno", JOptionPane.OK_CANCEL_OPTION);
+        JPanel form = new JPanel(new GridBagLayout());
+        painelAdd(form, new JLabel("Nome *:"),         0, 0); painelAdd(form, txtNome,      1, 0);
+        painelAdd(form, new JLabel("CPF:"),            0, 1); painelAdd(form, txtCpf,       1, 1);
+        painelAdd(form, new JLabel("Matrícula *:"),    0, 2); painelAdd(form, txtMatricula, 1, 2);
+        painelAdd(form, new JLabel("Email:"),          0, 3); painelAdd(form, txtEmail,     1, 3);
+        painelAdd(form, new JLabel("Curso:"),          0, 4); painelAdd(form, txtCurso,     1, 4);
+        painelAdd(form, new JLabel("Período (1-12):"), 0, 5); painelAdd(form, txtPeriodo,   1, 5);
 
-        if (res == JOptionPane.OK_OPTION) {
-            try {
-                Aluno a = editando ? aluno : new Aluno();
-                a.setNome(txtNome.getText().trim());
-                a.setRa(txtRa.getText().trim());
-                a.setEmail(txtEmail.getText().trim());
-                a.setCurso(txtCurso.getText().trim());
-                if (!editando) a.setApto(true);
+        int res = JOptionPane.showConfirmDialog(
+                this, form,
+                editando ? "Editar Aluno" : "Novo Aluno",
+                JOptionPane.OK_CANCEL_OPTION);
 
-                if (editando) service.editar(a);
-                else          service.cadastrar(a);
+        if (res != JOptionPane.OK_OPTION) return;
 
-                carregarDados();
-                JOptionPane.showMessageDialog(this, editando ? "Aluno atualizado!" : "Aluno cadastrado!");
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Dados inválidos", JOptionPane.WARNING_MESSAGE);
-            }
+        try {
+            Aluno a = editando ? aluno : new Aluno();
+            a.setNome(txtNome.getText().trim());
+            a.setCpf(txtCpf.getText().trim());
+            a.setMatricula(txtMatricula.getText().trim());
+            a.setEmail(txtEmail.getText().trim());
+            a.setCurso(txtCurso.getText().trim());
+            a.setPeriodo(Integer.parseInt(txtPeriodo.getText().trim()));
+
+            if (editando) service.editar(a);
+            else          service.cadastrar(a);
+
+            carregarDados();
+            JOptionPane.showMessageDialog(this, editando ? "Aluno atualizado!" : "Aluno cadastrado!");
+        } catch (Exception ex) {
+            GerenciadorExcecoes.tratar(this, ex);
         }
     }
 
     private void excluir() {
         Aluno a = getAlunoSelecionado();
         if (a == null) return;
-        int confirm = JOptionPane.showConfirmDialog(this,
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
                 "Excluir o aluno \"" + a.getNome() + "\"?",
-                "Confirmar", JOptionPane.YES_NO_OPTION);
+                "Confirmar",
+                JOptionPane.YES_NO_OPTION);
+
         if (confirm == JOptionPane.YES_OPTION) {
             service.excluir(a.getId());
             carregarDados();
@@ -156,23 +182,25 @@ public class TelaAlunos extends JFrame {
     private void alternarAptidao() {
         Aluno a = getAlunoSelecionado();
         if (a == null) return;
-        a.setApto(!a.isApto());
-        service.editar(a);
+
+        boolean novoEstado = !a.isApto();
+        service.alternarAptidao(a);
         carregarDados();
+
         JOptionPane.showMessageDialog(this,
-                "Aluno marcado como " + (a.isApto() ? "APTO" : "INAPTO") + ".");
+                "Aluno marcado como " + (novoEstado ? "APTO" : "INAPTO") + ".");
     }
 
     private void importarTxt() {
         JFileChooser chooser = new JFileChooser();
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try {
-                int qtd = service.importarDeTxt(chooser.getSelectedFile().getAbsolutePath());
-                carregarDados();
-                JOptionPane.showMessageDialog(this, qtd + " aluno(s) importado(s)!");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-            }
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+        try {
+            int qtd = service.importarDeTxt(chooser.getSelectedFile().getAbsolutePath());
+            carregarDados();
+            JOptionPane.showMessageDialog(this, qtd + " aluno(s) importado(s)!");
+        } catch (Exception ex) {
+            GerenciadorExcecoes.tratar(this, ex);
         }
     }
 }
