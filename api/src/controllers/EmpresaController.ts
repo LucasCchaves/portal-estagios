@@ -4,12 +4,13 @@ import type { EmpresaService } from "../services/EmpresaService"
 import AppError from "../utils/AppError"
 
 export class EmpresaController {
-  constructor(private readonly service: EmpresaService) {}
+  constructor(private readonly service: EmpresaService) { }
 
   private schemaCriar = z.object({
     nome: z.string({ message: "Nome obrigatório" }).trim().min(1),
     cnpj: z.string({ message: "CNPJ obrigatório" }).min(14, "CNPJ inválido"),
     email: z.string({ message: "Email obrigatório" }).email("Email inválido"),
+    senha: z.string({ message: "Senha obrigatória" }),
     telefone: z.string().optional(),
     area_atuacao: z.string().optional(),
     status: z.string().optional(),
@@ -18,6 +19,7 @@ export class EmpresaController {
   private schemaAtualizar = z.object({
     nome: z.string().trim().min(1).optional(),
     email: z.string().email().optional(),
+    senha: z.string().optional(),
     telefone: z.string().optional(),
     area_atuacao: z.string().optional(),
     status: z.string().optional(),

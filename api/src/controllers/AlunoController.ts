@@ -9,6 +9,7 @@ export class AlunoController {
   private schemaCriar = z.object({
     nome: z.string({ message: "Nome obrigatório" }).trim().min(1),
     email: z.string({ message: "Email obrigatório" }).email("Email inválido"),
+    senha: z.string({ message: "Senha obrigatória" }),
     cpf: z.string({ message: "CPF obrigatório" }).min(11, "CPF inválido"),
     matricula: z.string({ message: "Matrícula obrigatória" }).min(1),
     curso: z.string().optional(),
@@ -20,6 +21,7 @@ export class AlunoController {
   private schemaAtualizar = z.object({
     nome: z.string().trim().min(1).optional(),
     email: z.string().email().optional(),
+    senha: z.string().optional(),
     curso: z.string().optional(),
     periodo: z.number().optional(),
     apto: z.number().optional(),
