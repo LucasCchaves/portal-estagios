@@ -77,12 +77,14 @@ public class AlunoService implements IAlunoService {
 
     @Override
     public void bloquear(Aluno aluno) {
-
+        aluno.bloquear();
+        editar(aluno);
     }
 
     @Override
     public void ativar(Aluno aluno) {
-
+        aluno.ativar();
+        editar(aluno);
     }
 
     @Override
@@ -101,7 +103,7 @@ public class AlunoService implements IAlunoService {
                 if (linha.isBlank()) continue;
 
                 String[] partes = linha.split(";");
-                if (partes.length < 3) continue; // linha inválida, pula
+                if (partes.length < 3) continue;
 
                 Aluno a = new Aluno();
                 a.setNome(partes[0].trim());

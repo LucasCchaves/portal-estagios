@@ -81,19 +81,19 @@ public class TelaPrincipal extends JFrame {
         JPanel grade = new JPanel(new GridLayout(0, 2, 20, 20));
         grade.setBorder(BorderFactory.createEmptyBorder(20, 60, 40, 60));
 
-        grade.add(criarBotaoAtalho("👨‍🎓  Alunos",       "Cadastrar, editar e importar alunos",
+        grade.add(criarBotaoAtalho("Alunos",       "Cadastrar, editar e importar alunos",
                 () -> new TelaAlunos(alunoService).setVisible(true)));
 
-        grade.add(criarBotaoAtalho("🏢  Empresas",      "Aprovar, bloquear e consultar empresas",
+        grade.add(criarBotaoAtalho("Empresas",      "Aprovar, bloquear e consultar empresas",
                 () -> new TelaEmpresa(empresaService).setVisible(true)));
 
-        grade.add(criarBotaoAtalho("💼  Vagas",          "Consultar vagas cadastradas",
-                () -> new TelaVagas(vagaService).setVisible(true)));
+        grade.add(criarBotaoAtalho("Vagas",          "Consultar vagas cadastradas",
+                () -> new TelaVagas(vagaService, empresaService).setVisible(true)));
 
-        grade.add(criarBotaoAtalho("📋  Candidaturas",  "Visualizar candidaturas e status",
-                () -> new TelaCandidaturas(candidaturaService).setVisible(true)));
+        grade.add(criarBotaoAtalho("Candidaturas",  "Visualizar candidaturas e status",
+                () -> new TelaCandidaturas(candidaturaService, alunoService, vagaService).setVisible(true)));
 
-        grade.add(criarBotaoAtalho("📊  Relatórios",    "Gerar relatórios em .txt",
+        grade.add(criarBotaoAtalho("Relatórios",    "Gerar relatórios em .txt",
                 () -> new TelaRelatorios(alunoService, empresaService, vagaService, candidaturaService, "Alunos").setVisible(true)));
 
         wrapper.add(grade, BorderLayout.CENTER);

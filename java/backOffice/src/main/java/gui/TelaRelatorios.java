@@ -88,7 +88,6 @@ public class TelaRelatorios extends JFrame implements PainelDefault {
         tipoAtual = tipo;
         modelo.setRowCount(0);
 
-        // OCP: sem switch — só consulta o mapa
         Runnable loader = carregadores.get(tipo);
         if (loader != null) loader.run();
     }
